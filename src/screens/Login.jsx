@@ -1,40 +1,70 @@
-import { View, Button } from 'react-native';
-import React, { useEffect } from 'react';
+import { useNavigation } from '@react-navigation/native';
+import React, { useLayoutEffect } from 'react';
+import { StyleSheet, TouchableOpacity, Text } from 'react-native';
+import { gamecubeBright, gamecubeDark, textXL } from '../styles';
+import { LinearGradient } from 'expo-linear-gradient';
 import useAuth from '../hooks/useAuth';
-import * as WebBrowser from 'expo-web-browser';
-import * as Google from 'expo-auth-session/providers/google';
-import secrets from '../../secrets';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-const GOOGLE_WEB_ID = process.env.GOOGLE_WEB_ID || secrets.GOOGLE_WEB_ID;
-const GOOGLE_IOS_ID = process.env.GOOGLE_IOS_ID || secrets.GOOGLE_IOS_ID;
-const GOOGLE_ANDROID_ID =
-    process.env.GOOGLE_ANDROID_ID || secrets.GOOGLE_ANDROID_ID;
-
-WebBrowser.maybeCompleteAuthSession();
 const Login = () => {
-    const [request, response, promptAsync] = Google.useAuthRequest({
-        expoClientId: GOOGLE_WEB_ID,
-        webClientId: GOOGLE_WEB_ID,
-        iosClientId: GOOGLE_IOS_ID,
-        androidClientId: GOOGLE_ANDROID_ID
-    });
+    const navigation = useNavigation();
+    const { loginGoogle } = useAuth();
 
-    useEffect(() => {
-        if (response?.type === 'success') {
-            const { authentication } = response;
-            console.log(authentication);
-        }
-    }, [response]);
+    useLayoutEffect(() => {
+        navigation.setOptions({
+            headerShown: false
+        });
+    }, []);
 
     return (
-        <View>
-            <Button
-                title="Sign in with Google"
-                // leave `showInRecents: true` option for Android
-                onPress={() => promptAsync({ showInRecents: true })}
+        <LinearGradient
+            colors={[gamecubeBright, gamecubeDark]}
+            style={styles.container}
+        >
+            <MaterialCommunityIcons
+                name="nintendo-game-boy"
+                size={300}
+                color="white"
+                style={{ marginBottom: 100, textAlign: 'center' }}
             />
-        </View>
+            <TouchableOpacity
+                style={styles.loginButton}
+                // leave `showInRecents: true` option for Android
+                onPress={() => loginGoogle({ showInRecents: true })}
+            >
+                <Text style={styles.loginButtonText}>Sign in with Google</Text>
+            </TouchableOpacity>
+            <Text style={styles.callToAction}>
+                Meet people that love video games, anime, and manga as much as
+                you do.
+            </Text>
+        </LinearGradient>
     );
 };
 
 export default Login;
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        justifyContent: 'flex-end',
+        padding: 24,
+        paddingBottom: 50
+    },
+    loginButton: {
+        backgroundColor: 'white',
+        padding: 10,
+        borderRadius: 20
+    },
+    loginButtonText: {
+        color: gamecubeDark,
+        fontSize: textXL,
+        textAlign: 'center'
+    },
+    callToAction: {
+        marginTop: 24,
+        color: 'white',
+        fontSize: 18,
+        textAlign: 'center'
+    }
+});
